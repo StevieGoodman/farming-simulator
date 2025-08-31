@@ -1,0 +1,9 @@
+*.rbxl.lock
+*.lock
+.DS_Store
+Packages/
+build/
+node_modules/
+package.json
+package-lock.json
+sourcemap.json
