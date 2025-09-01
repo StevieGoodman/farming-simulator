@@ -1,7 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local TableUtil = require(ReplicatedStorage.Packages.TableUtil)
-local SoundConfig = require(ReplicatedStorage.Config.Sounds)
+local SoundConfig = require(ReplicatedStorage.Shared.Config.Sounds)
 
 export type SoundProperties = {
 	SoundId: number,
