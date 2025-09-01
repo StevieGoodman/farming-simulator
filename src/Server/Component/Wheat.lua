@@ -12,6 +12,17 @@ function Wheat.GetInRange(origin: Vector3, radius: number)
     return Wheat.Octree:SearchRadius(origin, radius)
 end
 
+function Wheat.Harvest(origin: Vector3, radius: number)
+    local wheatInRange = Wheat.GetInRange(origin, radius)
+    for _, wheatNode in wheatInRange do
+        local wheat = wheatNode.Object
+        if wheat.CurrentLevel == 0 then continue end
+        wheat:SetLevel(wheat.CurrentLevel - 1)
+        wheat:PlayHarvestEffects()
+    end
+    return #wheatInRange
+end
+
 function Wheat:Construct()
     self.Trove = Trove.new()
     self.Node = Wheat.Octree:CreateNode(self.Instance:GetPivot().Position, self)
@@ -50,7 +61,8 @@ function Wheat:SetLevel(newLevel: number)
     self.LastSetLevel = os.clock()
 end
 
-function Wheat:PlayHitEffects()
+function Wheat:PlayHarvestEffects()
+    self:PulseSize()
 end
 
 function Wheat:PulseSize()
