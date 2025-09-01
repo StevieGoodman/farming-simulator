@@ -29,7 +29,6 @@ function Axe:OnSwing(player: Player)
     if character == nil then return end
     local origin = character:GetPivot().Position
     local wheatHarvested = Wheat.Harvest(origin, 4)
-    print("Harvested", wheatHarvested, "wheat")
     WheatService:AddWheat(player, wheatHarvested)
 end
 
