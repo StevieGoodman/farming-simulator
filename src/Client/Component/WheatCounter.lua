@@ -14,10 +14,8 @@ function WheatCounter:Construct()
     self.Trove = Trove.new()
 end
 
-function WheatCounter:Start()
-    self.Trove:Add(Observers.observeAttribute(Players.LocalPlayer, "Wheat", function(_)
-        self:Update()
-    end))
+function WheatCounter:RenderSteppedUpdate()
+    self:Update()
 end
 
 function WheatCounter:Stop()
