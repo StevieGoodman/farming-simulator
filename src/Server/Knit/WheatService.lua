@@ -3,19 +3,18 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Observers = require(ReplicatedStorage.Packages.Observers)
 
+local UpgradeService
 local PlayerDataService
 
 local WheatService = Knit.CreateService({ Name = "Wheat" })
 
 function WheatService:KnitStart()
+	UpgradeService = Knit.GetService("Upgrade")
 	PlayerDataService = Knit.GetService("PlayerData")
 
 	Observers.observePlayer(function(player)
 		self:LoadWheat(player)
 		player:GetAttributeChangedSignal("Wheat"):Connect(function()
-			self:SaveWheat(player)
-		end)
-		player:GetAttributeChangedSignal("BagSize"):Connect(function()
 			self:SaveWheat(player)
 		end)
 	end)
@@ -34,20 +33,19 @@ function WheatService:SaveWheat(player)
 	end)
 end
 
-function WheatService:SaveBagSize(player)
-	PlayerDataService:UpdateKey(player, "BagSize", function(_)
-		return player:GetAttribute("BagSize")
-	end)
-end
-
 function WheatService:CanAfford(player, price)
     return player:GetAttribute("Wheat") >= price
+end
+
+function WheatService:GetBagSize(player)
+	local level = UpgradeService:GetLevel(player, "BagSize")
+	return UpgradeService:GetStrength("BagSize", level)
 end
 
 function WheatService:UpdateWheat(player, mutator)
 	local currentWheat = player:GetAttribute("Wheat")
 	local newWheat = mutator(currentWheat)
-	newWheat = math.min(newWheat, player:GetAttribute("BagSize") or math.huge)
+	newWheat = math.min(newWheat, self:GetBagSize(player))
 	player:SetAttribute("Wheat", newWheat)
 	return newWheat
 end
@@ -74,30 +72,6 @@ function WheatService:DeductWheat(player, amount)
 	return self:UpdateWheat(player, function(currentWheat)
 		return currentWheat - amount
 	end)
-end
-
-function WheatService:SetBagSize(player, size)
-	assert(size >= 0, `Cannot set BagSize to a negative amount`)
-	player:SetAttribute("BagSize", size)
-	if player:GetAttribute("Wheat") > size then
-		self:SetWheat(player, size)
-	end
-end
-
-function WheatService:AddBagSize(player, amount)
-	amount = math.floor(amount)
-	assert(amount >= 0, `Cannot give player a negative amount of BagSize`)
-	local newSize = (player:GetAttribute("BagSize") or 0) + amount
-	self:SetBagSize(player, newSize)
-	return newSize
-end
-
-function WheatService:DeductBagSize(player, amount)
-	amount = math.floor(amount)
-	assert(amount >= 0, `Cannot deduct player a negative amount of BagSize`)
-	local newSize = math.max((player:GetAttribute("BagSize") or 0) - amount, 0)
-	self:SetBagSize(player, newSize)
-	return newSize
 end
 
 function WheatService:ClearWheat(player)
