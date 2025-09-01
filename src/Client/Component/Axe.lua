@@ -1,8 +1,11 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local Component = require(ReplicatedStorage.Packages.Component)
 local Comm = require(ReplicatedStorage.Packages.Comm)
 local Trove = require(ReplicatedStorage.Packages.Trove)
+
+local Wheat = require(ReplicatedStorage.Shared.Component.Wheat)
 
 local Axe = Component.new({ Tag = "Axe", Ancestors = { workspace } })
 Axe.Comm = Comm.ClientComm.new(ReplicatedStorage, true, "Axe")
@@ -14,6 +17,7 @@ end
 
 function Axe:Start()
     self.Trove:Connect(self.Instance.Activated, function()
+        Wheat.Harvest(Players.LocalPlayer.Character:GetPivot().Position, 4)
         Axe.Swing(self.Instance)
     end)
 end

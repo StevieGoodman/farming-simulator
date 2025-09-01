@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local Component = require(ReplicatedStorage.Packages.Component)
@@ -12,33 +13,61 @@ function Wheat.GetInRange(origin: Vector3, radius: number)
     return Wheat.Octree:SearchRadius(origin, radius)
 end
 
-function Wheat.Harvest(origin: Vector3, radius: number)
+function Wheat.Harvest(origin: Vector3, radius: number): number
     local wheatInRange = Wheat.GetInRange(origin, radius)
+    local harvested = 0
     for _, wheatNode in wheatInRange do
         local wheat = wheatNode.Object
-        if wheat.CurrentLevel == 0 then continue end
-        wheat:SetLevel(wheat.CurrentLevel - 1)
+        local level = wheat:GetLevel()
+        if level == 0 then continue end
+        harvested += 1
+        wheat:SetLevel(level - 1)
+        if RunService:IsServer() then continue end
         wheat:PlayHarvestEffects()
     end
-    return #wheatInRange
+    return harvested
 end
 
 function Wheat:Construct()
     self.Trove = Trove.new()
     self.Node = Wheat.Octree:CreateNode(self.Instance:GetPivot().Position, self)
+    self.OriginalPartSizes = {}
+    self.PartVelocities = {}
 end
 
 function Wheat:Start()
-    self:SetLevel(0)
+    self:SetLevel(self.Instance:GetAttribute("WheatLevel") or 3)
+end
+
+function Wheat:RenderSteppedUpdate(deltaTime: number)
+    if RunService:IsServer() then return end
+    for _, descendant in self.Instance:GetDescendants() do
+        local isPart = descendant:IsA("BasePart")
+        if not isPart then continue end
+        local originalSize = self.OriginalPartSizes[descendant] or descendant.Size
+        local partVelocity = self.PartVelocities[descendant] or Vector3.zero
+        self.OriginalPartSizes[descendant] = originalSize
+        self.PartVelocities[descendant] = partVelocity
+        local size, velocity = TweenService:SmoothDamp(
+            descendant.Size,
+            self.OriginalPartSizes[descendant],
+            self.PartVelocities[descendant],
+            0.1,
+            nil,
+            deltaTime
+        )
+        descendant.Size = size
+        self.PartVelocities[descendant] = velocity
+    end
 end
 
 function Wheat:SteppedUpdate(_: number)
     if self.LastSetLevel == nil then return end
-    local threshold = if self.CurrentLevel == 0 then 10 else 3
+    local threshold = 5
     local timeSince = os.clock() - self.LastSetLevel
     if timeSince < threshold then return end
-    local newLevel = math.clamp(self.CurrentLevel + 1, 1, 3)
-    if newLevel == self.CurrentLevel then return end
+    local newLevel = math.clamp(self:GetLevel() + 1, 1, 3)
+    if newLevel == self:GetLevel() then return end
     self:SetLevel(newLevel)
 end
 
@@ -48,8 +77,12 @@ function Wheat:Stop()
     self.Node = nil
 end
 
+function Wheat:GetLevel()
+    return self.Instance:GetAttribute("WheatLevel")
+end
+
 function Wheat:SetLevel(newLevel: number)
-    self.CurrentLevel = newLevel
+    self.Instance:SetAttribute("WheatLevel", newLevel)
     for _, descendant in self.Instance:GetDescendants() do
         local isPart = descendant:IsA("BasePart")
         if not isPart then continue end
@@ -69,12 +102,7 @@ function Wheat:PulseSize()
     for _, descendant in self.Instance:GetDescendants() do
         local isPart = descendant:IsA("BasePart")
         if not isPart then continue end
-        local tween = TweenService:Create(
-            descendant,
-            TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, 0, true, 0),
-            { Size = descendant.Size * 1.3 }
-        )
-        tween:Play()
+        descendant.Size *= 1.2
     end
 end
 

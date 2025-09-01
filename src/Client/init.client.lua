@@ -16,7 +16,7 @@ for _, component in script.Component:GetDescendants() do
     if not component:IsA("ModuleScript") then continue end
     require(component)
 end
-for _, component in ReplicatedStorage.Shared:GetDescendants() do
+for _, component in ReplicatedStorage.Shared.Component:GetDescendants() do
     if not component:IsA("ModuleScript") then continue end
     require(component)
 end
