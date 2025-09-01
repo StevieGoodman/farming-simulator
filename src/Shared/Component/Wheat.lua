@@ -6,6 +6,7 @@ local Component = require(ReplicatedStorage.Packages.Component)
 local Octotree = require(ReplicatedStorage.Packages.Octotree)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 
+local ParticlePlayer = require(ReplicatedStorage.Shared.Modules.ParticlePlayer)
 local SoundPlayer = require(ReplicatedStorage.Shared.Modules.SoundPlayer)
 
 local Wheat = Component.new({ Tag = "Wheat", Ancestors = { workspace } })
@@ -101,6 +102,9 @@ function Wheat:PlayHarvestEffects()
     SoundPlayer.PlaySoundEffect("Harvest", {
         Parent = self.Instance,
         Pitch = Random.new():NextNumber(0.9, 1.1),
+    })
+    ParticlePlayer.PlayParticleEffect("Harvest", 20, {
+        Parent = self.Instance.PrimaryPart,
     })
 end
 
