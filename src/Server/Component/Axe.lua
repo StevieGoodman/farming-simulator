@@ -5,6 +5,7 @@ local Comm = require(ReplicatedStorage.Packages.Comm)
 local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 
+local UpgradeService = Knit.GetService("Upgrade")
 local WheatService = Knit.GetService("Wheat")
 local Wheat = require(ReplicatedStorage.Shared.Component.Wheat)
 
@@ -29,6 +30,9 @@ function Axe:OnSwing(player: Player)
     if character == nil then return end
     local origin = character:GetPivot().Position
     local wheatHarvested = Wheat.Harvest(origin, 4)
+    local level = UpgradeService:GetLevel(player, "AxeStrength")
+    local strength = UpgradeService:GetStrength("AxeStrength", level)
+    wheatHarvested *= strength
     WheatService:AddWheat(player, wheatHarvested)
 end
 
