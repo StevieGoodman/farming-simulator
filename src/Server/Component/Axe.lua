@@ -1,5 +1,4 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local ServerScriptService = game:GetService("ServerScriptService")
 
 local Component = require(ReplicatedStorage.Packages.Component)
 local Comm = require(ReplicatedStorage.Packages.Comm)
@@ -7,7 +6,7 @@ local Knit = require(ReplicatedStorage.Packages.Knit)
 local Trove = require(ReplicatedStorage.Packages.Trove)
 
 local WheatService = Knit.GetService("Wheat")
-local Wheat = require(ServerScriptService.Server.Component.Wheat)
+local Wheat = require(ReplicatedStorage.Shared.Component.Wheat)
 
 local Axe = Component.new({ Tag = "Axe", Ancestors = { workspace } })
 Axe.Comm = Comm.ServerComm.new(ReplicatedStorage, "Axe")

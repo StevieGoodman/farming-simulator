@@ -16,6 +16,10 @@ for _, component in script.Component:GetDescendants() do
     if not component:IsA("ModuleScript") then continue end
     require(component)
 end
+for _, component in ReplicatedStorage.Shared:GetDescendants() do
+    if not component:IsA("ModuleScript") then continue end
+    require(component)
+end
 print(`Component has successfully started on the server!`)
 
 -- Start Cmdr
